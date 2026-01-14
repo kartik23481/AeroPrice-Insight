@@ -1,0 +1,6 @@
+outs:
+- md5: dc5d89a35874755f024a43174e980074.dir
+  size: 15423552
+  nfiles: 2
+  hash: md5
+  path: backend_artifacts

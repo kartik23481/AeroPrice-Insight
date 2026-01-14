@@ -1,0 +1,4 @@
+/data/*
+!data/raw/
+!data/raw/flight_price.csv
+/backend_artifacts
