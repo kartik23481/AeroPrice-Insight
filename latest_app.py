@@ -15,8 +15,8 @@ import requests
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 
 from utils.feature_utils import (
-    is_north, find_part_of_month, part_of_day,
-    make_month_object, remove_duration, have_info,
+    is_north, part_of_month, part_of_day,
+    make_month_object, have_info,
     duration_category
 )
 

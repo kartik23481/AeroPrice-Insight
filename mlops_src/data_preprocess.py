@@ -118,7 +118,46 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates().reset_index(drop=True)
 
 
-# ========= main pipeline =========
+# # ========= main pipeline =========
+# def run(input_path: str, out_dir: str):
+#     logger.info(f"📥 Loading raw data from: {input_path}")
+#     os.makedirs(out_dir, exist_ok=True)
+
+#     df = pd.read_csv(input_path)
+#     logger.info(f"Raw shape = {df.shape}")
+
+#     df = df.drop_duplicates().reset_index(drop=True)
+
+#     df_cleaned = clean_dataframe(df)
+#     logger.info(f"After cleaning = {df_cleaned.shape}")
+
+#     # save cleaned full dataset
+#     cleaned_path = os.path.join(out_dir, "cleaned_flight_data.csv")
+#     df_cleaned.to_csv(cleaned_path, index=False)
+#     logger.info(f"💾 Cleaned data saved → {cleaned_path}")
+
+#     # split
+#     if "price" not in df_cleaned.columns:
+#         raise ValueError("Column 'price' not found — cannot split target.")
+
+#     X = df_cleaned.drop(columns=["price"])
+#     y = df_cleaned["price"]
+
+#     X_, X_test, y_, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+#     X_train, X_val, y_train, y_val = train_test_split(X_, y_, test_size=0.2, random_state=42)
+
+#     train = pd.concat([X_train, y_train], axis=1)
+#     val = pd.concat([X_val, y_val], axis=1)
+#     test = pd.concat([X_test, y_test], axis=1)
+
+#     train.to_csv(os.path.join(out_dir, "train_data.csv"), index=False)
+#     val.to_csv(os.path.join(out_dir, "val_data.csv"), index=False)
+#     test.to_csv(os.path.join(out_dir, "test_data.csv"), index=False)
+
+#     logger.info("💾 Saved train/val/test splits")
+#     logger.info("🚀 Preprocessing Completed Successfully!")
+
+
 def run(input_path: str, out_dir: str):
     logger.info(f"📥 Loading raw data from: {input_path}")
     os.makedirs(out_dir, exist_ok=True)
@@ -136,15 +175,59 @@ def run(input_path: str, out_dir: str):
     df_cleaned.to_csv(cleaned_path, index=False)
     logger.info(f"💾 Cleaned data saved → {cleaned_path}")
 
-    # split
+    # =============================
+    # Stratified Route-Based Split
+    # =============================
     if "price" not in df_cleaned.columns:
         raise ValueError("Column 'price' not found — cannot split target.")
 
-    X = df_cleaned.drop(columns=["price"])
-    y = df_cleaned["price"]
+    logger.info("Applying stratified split based on route...")
 
-    X_, X_test, y_, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    X_train, X_val, y_train, y_val = train_test_split(X_, y_, test_size=0.2, random_state=42)
+    df_split = df_cleaned.copy()
+
+    # ensure lowercase (safety)
+    df_split["source"] = df_split["source"].str.lower()
+    df_split["destination"] = df_split["destination"].str.lower()
+
+    # create route_key
+    df_split["route_key"] = list(zip(df_split["source"], df_split["destination"]))
+
+    # keep only routes with >= 2 samples
+    route_counts = df_split["route_key"].value_counts()
+    valid_routes = route_counts[route_counts >= 2].index
+
+    df_split = df_split[df_split["route_key"].isin(valid_routes)]
+
+    if df_split.empty:
+        raise ValueError("No valid routes found with >= 2 samples.")
+
+    logger.info(f"After route filtering = {df_split.shape}")
+
+    X = df_split.drop(columns=["price"])
+    y = df_split["price"]
+
+    # First split: Train+Val vs Test
+    X_, X_test, y_, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=42,
+        stratify=df_split["route_key"]
+    )
+
+    # Second split: Train vs Val
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_,
+        y_,
+        test_size=0.2,
+        random_state=42,
+        stratify=X_["route_key"]
+    )
+
+    # Drop route_key before saving
+    X_train = X_train.drop(columns=["route_key"])
+    X_val = X_val.drop(columns=["route_key"])
+    X_test = X_test.drop(columns=["route_key"])
 
     train = pd.concat([X_train, y_train], axis=1)
     val = pd.concat([X_val, y_val], axis=1)
@@ -154,7 +237,7 @@ def run(input_path: str, out_dir: str):
     val.to_csv(os.path.join(out_dir, "val_data.csv"), index=False)
     test.to_csv(os.path.join(out_dir, "test_data.csv"), index=False)
 
-    logger.info("💾 Saved train/val/test splits")
+    logger.info("💾 Saved train/val/test splits (stratified by route)")
     logger.info("🚀 Preprocessing Completed Successfully!")
 
 
