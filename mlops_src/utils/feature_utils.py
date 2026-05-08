@@ -3,8 +3,6 @@
 import numpy as np
 import pandas as pd
 
-north_cities = ['delhi', 'new delhi']
-
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 

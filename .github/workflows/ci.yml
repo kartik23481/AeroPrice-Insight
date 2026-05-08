@@ -79,4 +79,4 @@ jobs:
           -H "accept: application/json" \
           -H "content-type: application/json" \
           -d '{"image": "'"${{ secrets.DOCKERHUB_USERNAME }}"'/aeroprice-backend:latest"}' \
-          https://api.render.com/deploy/srv-d53s9pmmcj7s73ee2u5g?key=c2JWLl9fgj8
+          https://api.render.com/deploy/srv-d53s9pmmcj7s73ee2u5g?key=c2JWLl9fgj8 
