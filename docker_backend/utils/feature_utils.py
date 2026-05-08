@@ -39,17 +39,17 @@ def is_same_region(df):
 
 
 
-def is_north(temp):
-    if isinstance(temp, np.ndarray):
-        temp = pd.DataFrame(temp, columns=['source', 'destination'])
+# def is_north(temp):
+#     if isinstance(temp, np.ndarray):
+#         temp = pd.DataFrame(temp, columns=['source', 'destination'])
     
-    return (
-        temp.assign(
-            source_is_north=lambda df_: np.select([df_.source.isin(north_cities)], [1], default=[0]),
-            destination_is_north=lambda df_: np.select([df_.destination.isin(north_cities)], [1], default=[0])
-        )
-        .drop(columns=['source', 'destination'])
-    )
+#     return (
+#         temp.assign(
+#             source_is_north=lambda df_: np.select([df_.source.isin(north_cities)], [1], default=[0]),
+#             destination_is_north=lambda df_: np.select([df_.destination.isin(north_cities)], [1], default=[0])
+#         )
+#         .drop(columns=['source', 'destination'])
+#     )
 
 def part_of_month(df):
     if isinstance(df, np.ndarray):
@@ -108,11 +108,11 @@ def direct_flight(df):
         df.assign(is_direct_flight=df.total_stops.eq(0).astype(int))
     )
 
-def have_info(X):
-    if isinstance(X, np.ndarray):
-        X = pd.DataFrame(X, columns=['additional_info'])
+# def have_info(X):
+#     if isinstance(X, np.ndarray):
+#         X = pd.DataFrame(X, columns=['additional_info'])
     
-    return X.assign(additional_info=X.additional_info.ne("No Info").astype(int))
+#     return X.assign(additional_info=X.additional_info.ne("No Info").astype(int))
 
 # def remove_duration(df):
 #     if isinstance(df, np.ndarray):
