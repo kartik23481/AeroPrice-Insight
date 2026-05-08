@@ -15,12 +15,11 @@ import requests
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 
 from utils.feature_utils import (
-    is_north, part_of_month, part_of_day,
-    make_month_object, have_info,
+    is_same_region, part_of_month, part_of_day,
+    make_month_object,direct_flight,
     duration_category
 )
 
-from utils.rbf import RBFPercentileSimilarity
 
 RENDER_API_URL = "https://aeroprice-backend-new.onrender.com/predict"
 
@@ -181,8 +180,8 @@ def create_deal_gauge(price, historical_prices):
     )
     return fig
 
-st.markdown("<h1 style='text-align: center; color: #00ffcc;'>✈️ Flight Price Prediction</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: white;'>Predict your flight ticket prices instantly and plan smarter.</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #00ffcc;'>✈️ AeroForge ML</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: white;'>Predict your flight ticket prices instantly with Production-Ready Flight Price Prediction & MLOps Platform</p>", unsafe_allow_html=True)
 st.divider()
 
 with st.form("flight_input_form1"):
