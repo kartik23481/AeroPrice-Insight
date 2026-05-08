@@ -11,17 +11,6 @@ from utils.feature_utils import (
     duration_category
 )
 
-# from utils.feature_utils import (
-#     is_same_region,
-#     is_north,
-#     part_of_month,
-#     part_of_day,
-#     make_month_object,
-#     direct_flight,
-#     have_info,
-#     duration_category
-# )
-
 import utils.rbf
 
 

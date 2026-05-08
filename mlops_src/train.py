@@ -12,9 +12,8 @@ from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error
 import joblib
 
-# --------------------------
+
 # LOGGING
-# --------------------------
 from mlops_src.utils.logger import get_logger
 
 LOG_DIR = os.path.join("mlops_src", "logs")
@@ -22,9 +21,7 @@ logger = get_logger("train", os.path.join(LOG_DIR, "train.log"))
 logger.info("===== TRAINING STARTED =====")
 
 
-# --------------------------
 # PATHS
-# --------------------------
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
@@ -41,9 +38,7 @@ logger.info(f"Artifacts directory: {BACKEND_ARTIFACTS_DIR}")
 os.makedirs(BACKEND_ARTIFACTS_DIR, exist_ok=True)
 
 
-# --------------------------
-# MATCH FEATURE PIPELINE
-# --------------------------
+
 def prepare_df(df: pd.DataFrame) -> pd.DataFrame:
     logger.info("Preparing dataframe for transformation...")
 
@@ -60,9 +55,9 @@ def prepare_df(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# --------------------------
-# LOAD DATA
-# --------------------------
+
+# LOADING DATA
+
 logger.info("Loading train & val datasets...")
 
 train_df = pd.read_csv(TRAIN_PATH)
@@ -81,9 +76,9 @@ X_train = prepare_df(X_train.copy())
 X_val = prepare_df(X_val.copy())
 
 
-# --------------------------
-# LOAD TRANSFORMER
-# --------------------------
+
+# LOADING TRANSFORMER
+
 if not os.path.exists(TRANSFORMER_PATH):
     logger.error("Transformer NOT FOUND. Run feature_pipeline.py first!")
     raise FileNotFoundError(f"Missing transformer → {TRANSFORMER_PATH}")
@@ -96,9 +91,9 @@ X_train_tf = column_transformer.transform(X_train)
 X_val_tf = column_transformer.transform(X_val)
 
 
-# --------------------------
-# MLflow auto tuning
-# --------------------------
+
+# MLflow AUTO TUNING
+
 logger.info("Starting MLflow experiment: flight-price-training")
 mlflow.set_experiment("flight-price-training")
 

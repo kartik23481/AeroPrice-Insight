@@ -1,7 +1,7 @@
 """
 update_artifacts.py
 
-Ensures backend_artifacts → docker_backend/artifacts sync
+Ensuring backend_artifacts → docker_backend/artifacts sync
 and verifies copied files exist.
 """
 
@@ -82,7 +82,7 @@ def main():
     verify_sources_exist()
     clean_destination()
     copy_artifacts()
-    validate_destination()       # <-- POST-COPY VALIDATION ADDED
+    validate_destination()   
 
     logger.info("===== UPDATE ARTIFACTS COMPLETED =====")
 

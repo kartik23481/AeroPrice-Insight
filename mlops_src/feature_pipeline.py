@@ -3,7 +3,7 @@ import sys
 import joblib
 import pandas as pd
 
-# ensure imports from project root work
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT)
 
@@ -38,9 +38,8 @@ from sklearn.impute import SimpleImputer
 
 from logging import getLogger, basicConfig
 
-# ==============================
+
 # Logging Setup
-# ==============================
 from mlops_src.utils.logger import get_logger
 
 LOG_DIR = os.path.join(ROOT, "mlops_src", "logs")
@@ -50,7 +49,7 @@ logger.info("===== FEATURE PIPELINE STARTED =====")
 
 def build_pipeline():
     """
-    Build ColumnTransformer exactly matching updated feature_engineering.ipynb
+    ColumnTransformer building exactly matching latest_feature_engineering.ipynb
     """
 
     logger.info("Building airline pipeline...")
@@ -156,10 +155,9 @@ def build_pipeline():
 
 
 
-
 def fit_and_save(train_df: pd.DataFrame, y: pd.Series, artifacts_dir: str = None):
     """
-    Build, fit, and save column transformer INTO backend_artifacts folder.
+    Building, fit, and saving column transformer INTO backend_artifacts folder.
     """
 
     if artifacts_dir is None:
@@ -168,7 +166,7 @@ def fit_and_save(train_df: pd.DataFrame, y: pd.Series, artifacts_dir: str = None
     logger.info(f"Artifacts dir resolved → {artifacts_dir}")
     os.makedirs(artifacts_dir, exist_ok=True)
 
-    # create weekend + drop redundant
+
     date = pd.to_datetime(train_df.rename(columns={
         "dtoj_year": "year",
         "dtoj_month": "month",

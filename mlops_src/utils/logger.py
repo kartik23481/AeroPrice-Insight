@@ -18,18 +18,18 @@ def get_logger(name: str, log_file: str):
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
     logger = logging.getLogger(name)
 
-    if logger.handlers:  # avoid duplicate handlers
+    if logger.handlers:  # avoiding duplicate handlers
         return logger
 
     logger.setLevel(logging.INFO)
     fmt = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
 
-    # File for this module
+
     fh = logging.FileHandler(log_file)
     fh.setFormatter(fmt)
 
 
-    # Console output (CI friendly)
+    # Console output 
     ch = logging.StreamHandler()
     ch.setFormatter(fmt)
 

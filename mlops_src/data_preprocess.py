@@ -22,7 +22,7 @@ import sys
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-# add src to path
+# adding src to path
 SRC_ROOT = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SRC_ROOT, ".."))
 sys.path.append(PROJECT_ROOT)
@@ -30,13 +30,12 @@ sys.path.append(PROJECT_ROOT)
 from mlops_src.utils.logger import get_logger
 
 
-# ========= initialize logging =========
+# Logging initialised
 LOG_DIR = os.path.join(PROJECT_ROOT, "mlops_src", "logs")
 logger = get_logger("data_preprocess", os.path.join(LOG_DIR, "data_preprocess.log"))
 logger.info("===== DATA PREPROCESSING STARTED =====")
 
 
-# ========= helper functions =========
 def change_to_numerical_stops(value: str) -> int:
     v = str(value).strip().lower()
     mapping = {
@@ -66,15 +65,14 @@ def change_duration_type(value: str) -> int:
 def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
-    # normalize column names
+    # normalising column values
     df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
 
-    # normalize string columns
+    # normalising string columns
     obj_cols = df.select_dtypes(include="object").columns
     for c in obj_cols:
         df[c] = df[c].str.lower().str.strip()
 
-    # airline cleanup (exact notebook logic)
     if "airline" in df.columns:
         df["airline"] = (
             df["airline"].str.replace(" premium economy", "")
@@ -82,11 +80,11 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             .str.title()
         )
 
-    # total stops numeric
+
     if "total_stops" in df.columns:
         df["total_stops"] = df["total_stops"].apply(change_to_numerical_stops)
 
-    # duration numeric
+
     if "duration" in df.columns:
         df["duration"] = df["duration"].apply(change_duration_type)
 
@@ -96,7 +94,7 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         df["dep_time_hour"] = dep.dt.hour
         df["dep_time_min"] = dep.dt.minute
 
-    # parse date of journey
+
     for cand in ["date_of_journey", "date_of_journey_(dd/mm/yyyy)"]:
         if cand in df.columns:
             dtoj = pd.to_datetime(
@@ -107,55 +105,15 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             df["dtoj_year"] = dtoj.dt.year
             break
 
-    # drop unused
+
     drop_cols = ["date_of_journey", "dep_time", "route", "arrival_time"]
     df = df.drop(columns=[c for c in drop_cols if c in df.columns], errors="ignore")
 
-    # ensure strings
+
     for c in df.select_dtypes(include="object").columns:
         df[c] = df[c].astype(str)
 
     return df.drop_duplicates().reset_index(drop=True)
-
-
-# # ========= main pipeline =========
-# def run(input_path: str, out_dir: str):
-#     logger.info(f"📥 Loading raw data from: {input_path}")
-#     os.makedirs(out_dir, exist_ok=True)
-
-#     df = pd.read_csv(input_path)
-#     logger.info(f"Raw shape = {df.shape}")
-
-#     df = df.drop_duplicates().reset_index(drop=True)
-
-#     df_cleaned = clean_dataframe(df)
-#     logger.info(f"After cleaning = {df_cleaned.shape}")
-
-#     # save cleaned full dataset
-#     cleaned_path = os.path.join(out_dir, "cleaned_flight_data.csv")
-#     df_cleaned.to_csv(cleaned_path, index=False)
-#     logger.info(f"💾 Cleaned data saved → {cleaned_path}")
-
-#     # split
-#     if "price" not in df_cleaned.columns:
-#         raise ValueError("Column 'price' not found — cannot split target.")
-
-#     X = df_cleaned.drop(columns=["price"])
-#     y = df_cleaned["price"]
-
-#     X_, X_test, y_, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-#     X_train, X_val, y_train, y_val = train_test_split(X_, y_, test_size=0.2, random_state=42)
-
-#     train = pd.concat([X_train, y_train], axis=1)
-#     val = pd.concat([X_val, y_val], axis=1)
-#     test = pd.concat([X_test, y_test], axis=1)
-
-#     train.to_csv(os.path.join(out_dir, "train_data.csv"), index=False)
-#     val.to_csv(os.path.join(out_dir, "val_data.csv"), index=False)
-#     test.to_csv(os.path.join(out_dir, "test_data.csv"), index=False)
-
-#     logger.info("💾 Saved train/val/test splits")
-#     logger.info("🚀 Preprocessing Completed Successfully!")
 
 
 def run(input_path: str, out_dir: str):
@@ -170,14 +128,13 @@ def run(input_path: str, out_dir: str):
     df_cleaned = clean_dataframe(df)
     logger.info(f"After cleaning = {df_cleaned.shape}")
 
-    # save cleaned full dataset
     cleaned_path = os.path.join(out_dir, "cleaned_flight_data.csv")
     df_cleaned.to_csv(cleaned_path, index=False)
     logger.info(f"💾 Cleaned data saved → {cleaned_path}")
 
-    # =============================
+
     # Stratified Route-Based Split
-    # =============================
+
     if "price" not in df_cleaned.columns:
         raise ValueError("Column 'price' not found — cannot split target.")
 
@@ -185,14 +142,14 @@ def run(input_path: str, out_dir: str):
 
     df_split = df_cleaned.copy()
 
-    # ensure lowercase (safety)
+
     df_split["source"] = df_split["source"].str.lower()
     df_split["destination"] = df_split["destination"].str.lower()
 
-    # create route_key
+    # creating route_key
     df_split["route_key"] = list(zip(df_split["source"], df_split["destination"]))
 
-    # keep only routes with >= 2 samples
+    # keep only routes having atleat 2 samples
     route_counts = df_split["route_key"].value_counts()
     valid_routes = route_counts[route_counts >= 2].index
 
@@ -206,7 +163,6 @@ def run(input_path: str, out_dir: str):
     X = df_split.drop(columns=["price"])
     y = df_split["price"]
 
-    # First split: Train+Val vs Test
     X_, X_test, y_, y_test = train_test_split(
         X,
         y,
@@ -215,7 +171,6 @@ def run(input_path: str, out_dir: str):
         stratify=df_split["route_key"]
     )
 
-    # Second split: Train vs Val
     X_train, X_val, y_train, y_val = train_test_split(
         X_,
         y_,
@@ -224,7 +179,6 @@ def run(input_path: str, out_dir: str):
         stratify=X_["route_key"]
     )
 
-    # Drop route_key before saving
     X_train = X_train.drop(columns=["route_key"])
     X_val = X_val.drop(columns=["route_key"])
     X_test = X_test.drop(columns=["route_key"])
@@ -241,7 +195,6 @@ def run(input_path: str, out_dir: str):
     logger.info("🚀 Preprocessing Completed Successfully!")
 
 
-# ========= CLI entry =========
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flight Price Data Preprocessing")
 
